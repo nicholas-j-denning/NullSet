@@ -1,5 +1,6 @@
 #include "plugin.hpp"
-
+#include <array>
+#include <cmath>
 
 struct _16Squared : Module {
 	enum ParamId {
@@ -58,34 +59,258 @@ struct _16Squared : Module {
 
 	_16Squared() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(STEPS_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(CHANNELS_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(FORWARD_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(BACK_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_1_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_2_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_3_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_4_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_5_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_6_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_7_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_8_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_9_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_10_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_11_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_12_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_13_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_14_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_15_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(_16_PARAM, 0.f, 1.f, 0.f, "");
-		configInput(FORWARDIN_INPUT, "");
-		configInput(BACKIN_INPUT, "");
-		configInput(RESETIN_INPUT, "");
-		configOutput(OUT_OUTPUT, "");
+		configParam(STEPS_PARAM, 1.f, 16.f, 16.f, "Steps");
+		configParam(CHANNELS_PARAM, 1.f, 16.f, 1.f, "Channels");
+		configParam(FORWARD_PARAM, 0.f, 10.f, 0.f, "Forward");
+		configParam(BACK_PARAM, 0.f, 10.f, 0.f, "Back");
+		configParam(RESET_PARAM, 0.f, 10.f, 0.f, "Reset");
+		configParam(_1_PARAM, -10.f, 10.f, 0.f, "1");
+		configParam(_2_PARAM, -10.f, 10.f, 0.f, "2");
+		configParam(_3_PARAM, -10.f, 10.f, 0.f, "3");
+		configParam(_4_PARAM, -10.f, 10.f, 0.f, "4");
+		configParam(_5_PARAM, -10.f, 10.f, 0.f, "5");
+		configParam(_6_PARAM, -10.f, 10.f, 0.f, "6");
+		configParam(_7_PARAM, -10.f, 10.f, 0.f, "7");
+		configParam(_8_PARAM, -10.f, 10.f, 0.f, "8");
+		configParam(_9_PARAM, -10.f, 10.f, 0.f, "9");
+		configParam(_10_PARAM, -10.f, 10.f, 0.f, "10");
+		configParam(_11_PARAM, -10.f, 10.f, 0.f, "11");
+		configParam(_12_PARAM, -10.f, 10.f, 0.f, "12");
+		configParam(_13_PARAM, -10.f, 10.f, 0.f, "13");
+		configParam(_14_PARAM, -10.f, 10.f, 0.f, "14");
+		configParam(_15_PARAM, -10.f, 10.f, 0.f, "15");
+		configParam(_16_PARAM, -10.f, 10.f, 0.f, "16");
+		configInput(FORWARDIN_INPUT, "Forward");
+		configInput(BACKIN_INPUT, "Back");
+		configInput(RESETIN_INPUT, "Reset");
+		configOutput(OUT_OUTPUT, "Out");
+		for(int i = 0; i<16; i++)
+			for(int j = 0; j<16; j++)
+				value[i][j]=0;
 	}
 
+	int step = 1;
+	std::array<std::array<float,16>,16> value;
+	dsp::SchmittTrigger forwardTrigger;
+	dsp::SchmittTrigger backTrigger;
+	dsp::SchmittTrigger resetTrigger;
+	dsp::SchmittTrigger forwardButtonTrigger;
+	dsp::SchmittTrigger backButtonTrigger;
+	dsp::SchmittTrigger resetButtonTrigger;
+
 	void process(const ProcessArgs& args) override {
+
+		int totalSteps = std::floor(params[STEPS_PARAM].getValue());	
+		int channels = std::floor(params[CHANNELS_PARAM].getValue());	
+		outputs[OUT_OUTPUT].setChannels(channels);
+
+		setValues(step);
+		
+		// Get trigger inputs
+		bool forward = forwardTrigger.process(rescale(inputs[FORWARDIN_INPUT].getVoltage() , 0.1f, 2.f, 0.f, 1.f));
+		bool forwardButton = forwardButtonTrigger.process(rescale(params[FORWARD_PARAM].getValue(), 0.1f, 2.f, 0.f, 1.f));
+		bool back = backTrigger.process(rescale(inputs[BACKIN_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f));
+		bool backButton = backButtonTrigger.process(rescale(params[BACK_PARAM].getValue(), 0.1f, 2.f, 0.f, 1.f));
+		bool reset = resetTrigger.process(rescale(inputs[RESETIN_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f));
+		bool resetButton = resetButtonTrigger.process(rescale(params[RESET_PARAM].getValue(), 0.1f, 2.f, 0.f, 1.f));
+
+		// Update step
+		if(resetButton){
+			lightOff(step);
+			step=1;
+			lightOn(step);
+			getValues(step);
+			updateOutput(step,channels);
+		}
+		if(forwardButton){
+			lightOff(step);
+			step++;
+			if (step > totalSteps) step = 1;
+			lightOn(step);
+			getValues(step);
+			updateOutput(step,channels);
+		}
+		if(backButton){
+			lightOff(step);
+			step--;
+			if (step < 1) step = totalSteps;
+			lightOn(step);
+			getValues(step);
+			updateOutput(step,channels);
+		}
+		if(reset){
+			lightOff(step);
+			step=1;
+			lightOn(step);
+			getValues(step);
+			updateOutput(step,channels);
+		}
+		if(forward){
+			lightOff(step);
+			step++;
+			if (step > totalSteps) step = 1;
+			lightOn(step);
+			getValues(step);
+			updateOutput(step,channels);
+		}
+		if(back){
+			lightOff(step);
+			step--;
+			if (step < 1) step = totalSteps;
+			lightOn(step);
+			getValues(step);
+			updateOutput(step,channels);
+		}
+	}
+
+	void lightOff(int light){
+		switch(light){
+			case 1:
+				lights[L1_LIGHT].setBrightness(0.f);
+				break;
+			case 2:
+				lights[L2_LIGHT].setBrightness(0.f);
+				break;
+			case 3:
+				lights[L3_LIGHT].setBrightness(0.f);
+				break;
+			case 4:
+				lights[L4_LIGHT].setBrightness(0.f);
+				break;
+			case 5:
+				lights[L5_LIGHT].setBrightness(0.f);
+				break;
+			case 6:
+				lights[L6_LIGHT].setBrightness(0.f);
+				break;
+			case 7:
+				lights[L7_LIGHT].setBrightness(0.f);
+				break;
+			case 8:
+				lights[L8_LIGHT].setBrightness(0.f);
+				break;
+			case 9:
+				lights[L9_LIGHT].setBrightness(0.f);
+				break;
+			case 10:
+				lights[L10_LIGHT].setBrightness(0.f);
+				break;
+			case 11:
+				lights[L11_LIGHT].setBrightness(0.f);
+				break;
+			case 12:
+				lights[L12_LIGHT].setBrightness(0.f);
+				break;
+			case 13:
+				lights[L13_LIGHT].setBrightness(0.f);
+				break;
+			case 14:
+				lights[L14_LIGHT].setBrightness(0.f);
+				break;
+			case 15:
+				lights[L15_LIGHT].setBrightness(0.f);
+				break;
+			case 16:
+				lights[L16_LIGHT].setBrightness(0.f);
+				break;
+		}
+	}
+
+	void lightOn(int light){
+		switch(light){
+			case 1:
+				lights[L1_LIGHT].setBrightness(1.f);
+				break;
+			case 2:
+				lights[L2_LIGHT].setBrightness(1.f);
+				break;
+			case 3:
+				lights[L3_LIGHT].setBrightness(1.f);
+				break;
+			case 4:
+				lights[L4_LIGHT].setBrightness(1.f);
+				break;
+			case 5:
+				lights[L5_LIGHT].setBrightness(1.f);
+				break;
+			case 6:
+				lights[L6_LIGHT].setBrightness(1.f);
+				break;
+			case 7:
+				lights[L7_LIGHT].setBrightness(1.f);
+				break;
+			case 8:
+				lights[L8_LIGHT].setBrightness(1.f);
+				break;
+			case 9:
+				lights[L9_LIGHT].setBrightness(1.f);
+				break;
+			case 10:
+				lights[L10_LIGHT].setBrightness(1.f);
+				break;
+			case 11:
+				lights[L11_LIGHT].setBrightness(1.f);
+				break;
+			case 12:
+				lights[L12_LIGHT].setBrightness(1.f);
+				break;
+			case 13:
+				lights[L13_LIGHT].setBrightness(1.f);
+				break;
+			case 14:
+				lights[L14_LIGHT].setBrightness(1.f);
+				break;
+			case 15:
+				lights[L15_LIGHT].setBrightness(1.f);
+				break;
+			case 16:
+				lights[L16_LIGHT].setBrightness(1.f);
+				break;
+		}
+	}
+
+	void getValues(int step){
+		params[_1_PARAM].setValue(value[0][step-1]);
+		params[_2_PARAM].setValue(value[1][step-1]);
+		params[_3_PARAM].setValue(value[2][step-1]);
+		params[_4_PARAM].setValue(value[3][step-1]);
+		params[_5_PARAM].setValue(value[4][step-1]);
+		params[_6_PARAM].setValue(value[5][step-1]);
+		params[_7_PARAM].setValue(value[6][step-1]);
+		params[_8_PARAM].setValue(value[7][step-1]);
+		params[_9_PARAM].setValue(value[8][step-1]);
+		params[_10_PARAM].setValue(value[9][step-1]);
+		params[_11_PARAM].setValue(value[10][step-1]);
+		params[_12_PARAM].setValue(value[11][step-1]);
+		params[_13_PARAM].setValue(value[12][step-1]);
+		params[_14_PARAM].setValue(value[13][step-1]);
+		params[_15_PARAM].setValue(value[14][step-1]);
+		params[_15_PARAM].setValue(value[14][step-1]);
+		params[_16_PARAM].setValue(value[15][step-1]);
+	}
+
+	void setValues(int step){
+		value[0][step-1] = params[_1_PARAM].getValue();
+		value[1][step-1] = params[_2_PARAM].getValue();
+		value[2][step-1] = params[_3_PARAM].getValue();
+		value[3][step-1] = params[_4_PARAM].getValue();
+		value[4][step-1] = params[_5_PARAM].getValue();
+		value[5][step-1] = params[_6_PARAM].getValue();
+		value[6][step-1] = params[_7_PARAM].getValue();
+		value[7][step-1] = params[_8_PARAM].getValue();
+		value[8][step-1] = params[_9_PARAM].getValue();
+		value[9][step-1] = params[_10_PARAM].getValue();
+		value[10][step-1] = params[_11_PARAM].getValue();
+		value[11][step-1] = params[_12_PARAM].getValue();
+		value[12][step-1] = params[_13_PARAM].getValue();
+		value[13][step-1] = params[_14_PARAM].getValue();
+		value[14][step-1] = params[_15_PARAM].getValue();
+		value[15][step-1] = params[_16_PARAM].getValue();
+	}
+
+	void updateOutput(int step, int channels){
+		for (int i=0; i < channels;i++)
+			outputs[OUT_OUTPUT].setVoltage(value[i][step],i);
 	}
 };
 
@@ -97,9 +322,9 @@ struct _16SquaredWidget : ModuleWidget {
 
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(22.177, 13.484)), module, _16Squared::STEPS_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(36.726, 13.484)), module, _16Squared::CHANNELS_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(16.677, 36.291)), module, _16Squared::FORWARD_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.615, 36.291)), module, _16Squared::BACK_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(42.552, 36.291)), module, _16Squared::RESET_PARAM));
+		addParam(createParamCentered<VCVButton>(mm2px(Vec(16.677, 36.291)), module, _16Squared::FORWARD_PARAM));
+		addParam(createParamCentered<VCVButton>(mm2px(Vec(29.615, 36.291)), module, _16Squared::BACK_PARAM));
+		addParam(createParamCentered<VCVButton>(mm2px(Vec(42.552, 36.291)), module, _16Squared::RESET_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.515, 72.387)), module, _16Squared::_1_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(23.452, 72.387)), module, _16Squared::_2_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(36.39, 72.387)), module, _16Squared::_3_PARAM));
