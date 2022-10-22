@@ -30,6 +30,20 @@
       "name": "Weighted Quantizer",
       "description": "",
       "tags": []
+    },
+    {
+      "slug": "PolyLFT",
+      "name": "Poly LFT",
+      "description": "Poly Low Frequency Triangle Oscillator",
+      "tags": [
+        "LFO"
+      ]
+    },
+    {
+      "slug": "16Squared",
+      "name": "16 Squared",
+      "description": "16 Step Polyphonic Sequencer",
+      "tags": []
     }
   ]
 }
