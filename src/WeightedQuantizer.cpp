@@ -80,7 +80,9 @@ struct WeightedQuantizer : Module {
 
 		// if no pitched are enabled, short circuit input to output
 		if (paramSum==0){
-			outputs[OUT_OUTPUT].setVoltage(in[0]);
+			for (int i = 0; i <poly; i++){
+			outputs[OUT_OUTPUT].setVoltage(in[i],i);
+			}
 		}
 		else {
 			for (int i = 0; i<poly; i++){

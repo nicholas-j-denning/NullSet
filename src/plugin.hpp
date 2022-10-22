@@ -12,3 +12,5 @@ extern Plugin* pluginInstance;
 extern Model* modelQuickMelody;
 extern Model* modelPolyAutoPan;
 extern Model* modelWeightedQuantizer;
+extern Model* modelPolyLFT;
+extern Model* model_16Squared;
