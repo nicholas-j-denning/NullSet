@@ -44,6 +44,14 @@
       "name": "16 Squared",
       "description": "16 Step Polyphonic Sequencer",
       "tags": []
+    },
+    {
+      "slug": "LabeledPatchbay",
+      "name": "Labeled Patchbay",
+      "description": "",
+      "tags": [
+        "Utility"
+      ]
     }
   ]
 }
