@@ -84,6 +84,7 @@ struct _16Squared : Module {
 		configInput(BACKIN_INPUT, "Back");
 		configInput(RESETIN_INPUT, "Reset");
 		configOutput(OUT_OUTPUT, "Out");
+		lightOn(step);
 		for(int i = 0; i<16; i++)
 			for(int j = 0; j<16; j++)
 				value[i][j]=0;
@@ -120,7 +121,6 @@ struct _16Squared : Module {
 			step=1;
 			lightOn(step);
 			getValues(step);
-			updateOutput(step,channels);
 		}
 		if(forwardButton){
 			lightOff(step);
@@ -128,7 +128,6 @@ struct _16Squared : Module {
 			if (step > totalSteps) step = 1;
 			lightOn(step);
 			getValues(step);
-			updateOutput(step,channels);
 		}
 		if(backButton){
 			lightOff(step);
@@ -136,14 +135,12 @@ struct _16Squared : Module {
 			if (step < 1) step = totalSteps;
 			lightOn(step);
 			getValues(step);
-			updateOutput(step,channels);
 		}
 		if(reset){
 			lightOff(step);
 			step=1;
 			lightOn(step);
 			getValues(step);
-			updateOutput(step,channels);
 		}
 		if(forward){
 			lightOff(step);
@@ -151,7 +148,6 @@ struct _16Squared : Module {
 			if (step > totalSteps) step = 1;
 			lightOn(step);
 			getValues(step);
-			updateOutput(step,channels);
 		}
 		if(back){
 			lightOff(step);
@@ -159,8 +155,9 @@ struct _16Squared : Module {
 			if (step < 1) step = totalSteps;
 			lightOn(step);
 			getValues(step);
-			updateOutput(step,channels);
 		}
+		
+		updateOutput(step,channels);
 	}
 
 	void lightOff(int light){
@@ -310,7 +307,49 @@ struct _16Squared : Module {
 
 	void updateOutput(int step, int channels){
 		for (int i=0; i < channels;i++)
-			outputs[OUT_OUTPUT].setVoltage(value[i][step],i);
+			outputs[OUT_OUTPUT].setVoltage(value[i][step-1],i);
+	}
+
+	//automatically called by VCV to save state
+	json_t* dataToJson() override {
+		//make root json object
+		json_t *rootJ = json_object();
+
+		//add step to json
+		json_object_set_new(rootJ, "step", json_integer(step));
+		
+		//add value to json
+		json_t *valueJ = json_array();
+		for(int i = 0; i<16; i++){
+			for(int j = 0; j<16; j++){
+				json_array_insert_new(valueJ, j+(i*16),json_real(value[i][j]));
+			}
+		}
+		json_object_set_new(rootJ, "value", valueJ);
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t *rootJ) override {
+
+		// get step from json
+		json_t * stepJ = json_object_get(rootJ, "step");
+		if (stepJ)
+			step = json_integer_value(stepJ);
+		
+		lightOff(1);
+		lightOn(step);
+
+		//get value[][] from json
+		json_t *valueJ = json_object_get(rootJ, "value");	
+		if (valueJ)
+			for(int i = 0; i<16; i++){
+				for(int j = 0; j<16; j++){
+					json_t *valueArrayJ = json_array_get(valueJ,j+(i*16));
+					if (valueArrayJ)
+						value[i][j] = json_number_value(valueArrayJ);	
+				}
+			}	
 	}
 };
 
