@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="40.639999mm"
+   height="128.5mm"
+   viewBox="0 0 40.639999 128.5"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="Pulsar.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="4.2179991"
+     inkscape:cx="26.908493"
+     inkscape:cy="56.899016"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="components"
+     style="fill:#00ff00">
+    <circle
+       style="fill:#00ff00;stroke:none;stroke-width:0.30909;stroke-linecap:square"
+       id="voct"
+       cx="11.228169"
+       cy="14.991804"
+       r="1.0663626"
+       inkscape:label="voct" />
+    <circle
+       style="fill:#0000ff;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       id="out"
+       cx="21.139072"
+       cy="118.55443"
+       r="0.87818098"
+       inkscape:label="out" />
+    <circle
+       style="fill:#ff0000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       id="bi"
+       cx="28.94861"
+       cy="15.023168"
+       r="0.72136295"
+       inkscape:label="bi" />
+    <circle
+       style="fill:#ff0000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       id="taper"
+       cx="25.216341"
+       cy="31.551788"
+       r="0.72136295"
+       inkscape:label="taper" />
+    <circle
+       style="fill:#ff0000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       id="width"
+       cx="10.538173"
+       cy="30.987244"
+       r="0.72136295"
+       inkscape:label="width" />
+    <circle
+       style="fill:#ff0000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       id="lfo"
+       cx="18.379074"
+       cy="44.159958"
+       r="0.72136295"
+       inkscape:label="lfo" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       x="21.112904"
+       y="113.37097"
+       id="text343"><tspan
+         sodipodi:role="line"
+         id="tspan341"
+         style="stroke-width:0.5;stroke:none;fill:#000000"
+         x="21.112904"
+         y="113.37097">Out</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       x="12.064515"
+       y="10.467741"
+       id="text455"><tspan
+         sodipodi:role="line"
+         id="tspan453"
+         style="stroke-width:0.5;stroke:none;fill:#000000"
+         x="12.064515"
+         y="10.467741">V/Oct</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#0000ff;stroke:#220826;stroke-width:0.499999;stroke-linecap:square"
+       x="11.354838"
+       y="24.483871"
+       id="text509"><tspan
+         sodipodi:role="line"
+         id="tspan507"
+         style="stroke-width:0.5"
+         x="11.354838"
+         y="24.483871" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       x="28.919355"
+       y="11.177419"
+       id="text513"><tspan
+         sodipodi:role="line"
+         id="tspan511"
+         style="stroke-width:0.5;stroke:none;fill:#000000"
+         x="28.919355"
+         y="11.177419">Uni/Bi</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       x="9.4392052"
+       y="27.569796"
+       id="text517"><tspan
+         sodipodi:role="line"
+         id="tspan515"
+         style="stroke:none;stroke-width:0.5;fill:#000000"
+         x="9.4392052"
+         y="27.569796">Width</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       x="25.341795"
+       y="28.164518"
+       id="text521"><tspan
+         sodipodi:role="line"
+         id="tspan519"
+         style="stroke:none;stroke-width:0.5;fill:#000000"
+         x="25.341795"
+         y="28.164518">Taper</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;font-family:'Futura PT';-inkscape-font-specification:'Futura PT';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.499999;stroke-linecap:square"
+       x="18.692709"
+       y="40.709961"
+       id="text1233"><tspan
+         sodipodi:role="line"
+         id="tspan1231"
+         style="stroke-width:0.5"
+         x="18.692709"
+         y="40.709961">LFO</tspan></text>
+  </g>
+</svg>
