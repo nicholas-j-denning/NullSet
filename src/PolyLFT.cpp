@@ -4,13 +4,16 @@
 
 struct PolyLFT : Module {
 	enum ParamId {
-		CHANNELS_PARAM,
-		RATE_PARAM,
-		MIN_PARAM,
-		MAX_PARAM,
+		POLY_PARAM,
+		PRATE_PARAM,
+		PMIN_PARAM,
+		PMAX_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
+		IRATE_INPUT,
+		IMIN_INPUT,
+		IMAX_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -23,18 +26,30 @@ struct PolyLFT : Module {
 
 	PolyLFT() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(CHANNELS_PARAM, 1.f, 16.f, 1.f, "test");
-		configParam(RATE_PARAM, 1.f, 500.f, 120.f, "");
-		configParam(MIN_PARAM, -10.f, 10.f, -5.f, "");
-		configParam(MAX_PARAM, -10.f, 10.f, 5.f, "");
-		configOutput(OUT_OUTPUT, "");
+		configParam(POLY_PARAM, 1.f, 16.f, 1.f, "Channels");
+		configParam(PRATE_PARAM, 0.1f, 500.f, 120.f, "Rate (BPM)");
+		configParam(PMIN_PARAM, -10.f, 10.f, -5.f, "Min");
+		configParam(PMAX_PARAM, -10.f, 10.f, 5.f, "Max");
+		configInput(IRATE_INPUT, "Rate");
+		configInput(IMIN_INPUT, "Min");
+		configInput(IMAX_INPUT, "Max");
+		configOutput(OUT_OUTPUT, "LFO");
 	}
 
 	float phase = 0.f;
 	std::array<float,16> phases;
 
 	void process(const ProcessArgs& args) override {
-		int bpm = params[RATE_PARAM].getValue();
+		float bpm;
+
+		if (inputs[IRATE_INPUT].isConnected()){
+			float in = inputs[IRATE_INPUT].getVoltage();
+			bpm = 24.995f*in+250.05f;
+		}
+		else {
+			bpm = params[PRATE_PARAM].getValue();
+		}
+			
 		float freq = float(bpm) / 60;
 
 		//accumulate phase
@@ -42,7 +57,7 @@ struct PolyLFT : Module {
 			if (phase >= 0.5f)
 				phase -= 1.f;	
 
-		int poly = std::floor(params[CHANNELS_PARAM].getValue());
+		int poly = std::floor(params[POLY_PARAM].getValue());
 
 		// Equally space phases according to number of input channels
 		for ( int i = 0; i<poly; i++) {
@@ -62,10 +77,23 @@ struct PolyLFT : Module {
 		float result;
 		if (phase >= 0) result = -phase;
 		else result = phase;
-		float min = params[MIN_PARAM].getValue();
-		float max = params[MAX_PARAM].getValue();
+		float min; 
+		if (inputs[IMIN_INPUT].isConnected()){
+			min = inputs[IMIN_INPUT].getVoltage();
+		}
+		else {
+			min = params[PMIN_PARAM].getValue();
+		}
+		float max;
+		if (inputs[IMAX_INPUT].isConnected()){
+			max = inputs[IMAX_INPUT].getVoltage();
+		}
+		else {
+			max = params[PMAX_PARAM].getValue();
+		}
 		return 2*(min-max)*result+min;
 	}
+
 };
 
 
@@ -74,12 +102,16 @@ struct PolyLFTWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/PolyLFT.svg")));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.16, 15.452)), module, PolyLFT::CHANNELS_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.16, 37.435)), module, PolyLFT::RATE_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.16, 61.742)), module, PolyLFT::MIN_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.16, 87.113)), module, PolyLFT::MAX_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.375, 15.694)), module, PolyLFT::POLY_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.256, 34.086)), module, PolyLFT::PRATE_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.256, 63.193)), module, PolyLFT::PMIN_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.256, 92.299)), module, PolyLFT::PMAX_PARAM));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.16, 111.952)), module, PolyLFT::OUT_OUTPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.256, 44.7)), module, PolyLFT::IRATE_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.256, 73.806)), module, PolyLFT::IMIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.256, 102.912)), module, PolyLFT::IMAX_INPUT));
+
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.348, 120.652)), module, PolyLFT::OUT_OUTPUT));
 	}
 };
 

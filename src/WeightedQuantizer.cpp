@@ -3,7 +3,6 @@
 #include <array>
 #include <numeric>
 
-
 struct WeightedQuantizer : Module {
 	enum ParamId {
 		C_PARAM,
@@ -21,8 +20,8 @@ struct WeightedQuantizer : Module {
 		PARAMS_LEN
 	};
 	enum InputId {
-		IN_INPUT,
 		CIN_INPUT,
+		IN_INPUT,
 		DBIN_INPUT,
 		DIN_INPUT,
 		EBIN_INPUT,
@@ -193,35 +192,34 @@ struct WeightedQuantizerWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/WeightedQuantizer.svg")));
 
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.241, 16.378)), module, WeightedQuantizer::C_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(49.08, 24.721)), module, WeightedQuantizer::DB_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.241, 33.728)), module, WeightedQuantizer::D_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(49.169, 41.981)), module, WeightedQuantizer::EB_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.197, 51.033)), module, WeightedQuantizer::E_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.197, 68.291)), module, WeightedQuantizer::F_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(49.124, 76.544)), module, WeightedQuantizer::GB_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.197, 85.685)), module, WeightedQuantizer::G_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(49.08, 93.849)), module, WeightedQuantizer::AB_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.197, 102.901)), module, WeightedQuantizer::A_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(49.124, 111.243)), module, WeightedQuantizer::BB_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(24.197, 120.206)), module, WeightedQuantizer::B_PARAM));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 5.201)), module, WeightedQuantizer::C_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 15.983)), module, WeightedQuantizer::DB_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 26.764)), module, WeightedQuantizer::D_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 37.546)), module, WeightedQuantizer::EB_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 48.328)), module, WeightedQuantizer::E_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 59.109)), module, WeightedQuantizer::F_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 69.891)), module, WeightedQuantizer::GB_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 80.672)), module, WeightedQuantizer::G_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 91.454)), module, WeightedQuantizer::AB_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 102.236)), module, WeightedQuantizer::A_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 113.017)), module, WeightedQuantizer::BB_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.411, 123.799)), module, WeightedQuantizer::B_PARAM));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.863, 16.415)), module, WeightedQuantizer::CIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.475, 24.5)), module, WeightedQuantizer::IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(59.746, 24.712)), module, WeightedQuantizer::DBIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.863, 33.72)), module, WeightedQuantizer::DIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(59.746, 41.973)), module, WeightedQuantizer::EBIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.863, 51.025)), module, WeightedQuantizer::EIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.819, 68.327)), module, WeightedQuantizer::FIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(59.702, 76.58)), module, WeightedQuantizer::GBIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.863, 85.632)), module, WeightedQuantizer::GIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(59.746, 93.841)), module, WeightedQuantizer::ABIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.863, 102.937)), module, WeightedQuantizer::AIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(59.746, 111.191)), module, WeightedQuantizer::BBIN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(34.863, 120.243)), module, WeightedQuantizer::BIN_INPUT));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(4.62, 5.161)), module, WeightedQuantizer::IN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 5.149)), module, WeightedQuantizer::CIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 15.93)), module, WeightedQuantizer::DBIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 26.712)), module, WeightedQuantizer::DIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 37.493)), module, WeightedQuantizer::EBIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 48.275)), module, WeightedQuantizer::EIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 59.057)), module, WeightedQuantizer::FIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 69.838)), module, WeightedQuantizer::GBIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 80.62)), module, WeightedQuantizer::GIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 91.402)), module, WeightedQuantizer::ABIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 102.183)), module, WeightedQuantizer::AIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 112.965)), module, WeightedQuantizer::BBIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.77, 123.747)), module, WeightedQuantizer::BIN_INPUT));
-
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.33, 123.839)), module, WeightedQuantizer::OUT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.475, 111.153)), module, WeightedQuantizer::OUT_OUTPUT));
 	}
 };
 

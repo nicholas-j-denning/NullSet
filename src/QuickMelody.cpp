@@ -3,13 +3,16 @@
 
 struct QuickMelody : Module {
 	enum ParamId {
-		PATTERN_PARAM,
-		MIN_PARAM,
-		MAX_PARAM,
+		PPATTERN_PARAM,
+		PMAX_PARAM,
+		PMIN_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
 		CLOCK_INPUT,
+		IPATTERN_INPUT,
+		IMAX_INPUT,
+		IMIN_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -22,15 +25,17 @@ struct QuickMelody : Module {
 
 	QuickMelody() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(PATTERN_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(MIN_PARAM, -10.f, 10.f, -5.f, "");
-		configParam(MAX_PARAM, -10.f, 10.f, 5.f, "");
-		configInput(CLOCK_INPUT, "");
-		configOutput(OUT_OUTPUT, "");
+		configParam(PPATTERN_PARAM, 0.f, 1.f, 0.f, "New Pattern");
+		configParam(PMAX_PARAM, -10.f, 10.f, -5.f, "Max");
+		configParam(PMIN_PARAM, -10.f, 10.f, 5.f, "Min");
+		configInput(CLOCK_INPUT, "Clock");
+		configInput(IPATTERN_INPUT, "New Pattern");
+		configInput(IMAX_INPUT, "Max");
+		configInput(IMIN_INPUT, "Min");
+		configOutput(OUT_OUTPUT, "Sequence");
 		random::init();
 		float r = random::uniform();
 		freq = dsp::FREQ_A4 * std::pow(2.f, 3.f*r);
-		divider.setDivision(32);
 	}
 
 	//main phase of the generator
@@ -45,47 +50,72 @@ struct QuickMelody : Module {
 	std::array<dsp::SchmittTrigger,16> clockTrigger;
 	dsp::SchmittTrigger patternTrigger;
 
-	//divide samplerate for CPU
-	dsp::ClockDivider divider;
-
 	void process(const ProcessArgs& args) override {
 		
-		// process only every 32 samples
-		if (divider.process()){
-			// Accumulate phase
-			phase += freq * args.sampleTime;
-			if (phase >= 1.f)
-				phase -= 1.f;
+		// Accumulate phase
+		phase += freq * args.sampleTime;
+		if (phase >= 1.f)
+			phase -= 1.f;
 
-			// New Random pattern on button press
-			if (params[PATTERN_PARAM].getValue()){
-				float r = random::uniform();
-				freq = dsp::FREQ_A4 * std::pow(2.f, 3.f*r);
-			}
+		// New Random pattern on button press
+		if (params[PPATTERN_PARAM].getValue()){
+			float r = random::uniform();
+			freq = dsp::FREQ_A4 * std::pow(2.f, 3.f*r);
+		}
 
-			//configure polyphony
-			int poly = inputs[CLOCK_INPUT].getChannels();
-			outputs[OUT_OUTPUT].setChannels(poly);
+		float patt = inputs[IPATTERN_INPUT].getVoltage();
+		// New Random pattern on trigger
+		if (patternTrigger.process(rescale(patt, 0.1f, 2.f, 0.f, 1.f))){
+			float r = random::uniform();
+			freq = dsp::FREQ_A4 * std::pow(2.f, 3.f*r);
+		}
 
-			// Equally space phases according to number of input channels
-			for ( int i = 0; i<poly; i++) {
-				phases[i]=phase+float(i)/float(poly);
-				if (phases[i]>=1.f) phases[i] -= 1.f;
-			}
+		//configure polyphony
+		int poly = inputs[CLOCK_INPUT].getChannels();
+		outputs[OUT_OUTPUT].setChannels(poly);
 
-			// Change notes on clock trigger
-			for ( int i = 0; i<poly; i++) {
-				float in = inputs[CLOCK_INPUT].getVoltage(i);
-				if (clockTrigger[i].process(rescale(in, 0.1f, 2.f, 0.f, 1.f))){
-					float min = params[MIN_PARAM].getValue();
-					float max = params[MAX_PARAM].getValue();
-					float m = max - min;
-					float b = min;
-					float out = m*phases[i]+b;
-					outputs[OUT_OUTPUT].setVoltage(out,i);
+		// Equally space phases according to number of input channels
+		for ( int i = 0; i<poly; i++) {
+			phases[i]=phase+float(i)/float(poly);
+			if (phases[i]>=1.f) phases[i] -= 1.f;
+		}
+
+		// Change notes on clock trigger
+		for ( int i = 0; i<poly; i++) {
+			float in = inputs[CLOCK_INPUT].getVoltage(i);
+			if (clockTrigger[i].process(rescale(in, 0.1f, 2.f, 0.f, 1.f))){
+				float min; 
+				if (inputs[IMIN_INPUT].isConnected()){
+					min = inputs[IMIN_INPUT].getVoltage();
 				}
+				else {
+					min = params[PMIN_PARAM].getValue();
+				}
+				float max;
+				if (inputs[IMAX_INPUT].isConnected()){
+					max = inputs[IMAX_INPUT].getVoltage();
+				}
+				else {
+					max = params[PMAX_PARAM].getValue();
+				}
+				float m = max - min;
+				float b = min;
+				float out = m*phases[i]+b;
+				outputs[OUT_OUTPUT].setVoltage(out,i);
 			}
 		}
+	}
+
+	json_t* dataToJson() override {
+		json_t *rootJ = json_object();
+		json_object_set_new(rootJ, "freq", json_real(freq));
+		return rootJ;
+	}
+
+	void dataFromJson(json_t *rootJ) override {
+		json_t * freqJ = json_object_get(rootJ, "freq");
+		if (freqJ)
+			freq = json_real_value(freqJ);
 	}
 };
 
@@ -95,13 +125,16 @@ struct QuickMelodyWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/QuickMelody.svg")));
 
-		addParam(createParamCentered<VCVButton>(mm2px(Vec(10.16, 37.435)), module, QuickMelody::PATTERN_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.16, 61.742)), module, QuickMelody::MIN_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.16, 87.113)), module, QuickMelody::MAX_PARAM));
+		addParam(createParamCentered<VCVButton>(mm2px(Vec(10.447, 36.934)), module, QuickMelody::PPATTERN_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.447, 65.236)), module, QuickMelody::PMAX_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.447, 93.589)), module, QuickMelody::PMIN_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.16, 15.452)), module, QuickMelody::CLOCK_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.447, 19.038)), module, QuickMelody::CLOCK_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.447, 47.924)), module, QuickMelody::IPATTERN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.447, 75.581)), module, QuickMelody::IMAX_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.447, 104.589)), module, QuickMelody::IMIN_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.16, 111.952)), module, QuickMelody::OUT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.447, 121.854)), module, QuickMelody::OUT_OUTPUT));
 	}
 };
 

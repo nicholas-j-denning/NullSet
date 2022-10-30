@@ -1,14 +1,15 @@
 #include "plugin.hpp"
 #include <array>
 
-
 struct PolyAutoPan : Module {
 	enum ParamId {
-		RATE_PARAM,
+		PRATE_PARAM,
+		TRIM_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
 		IN_INPUT,
+		IRATE_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -22,17 +23,29 @@ struct PolyAutoPan : Module {
 
 	PolyAutoPan() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(RATE_PARAM, 1.f, 500.f, 120.f, "");
-		configInput(IN_INPUT, "");
-		configOutput(RIGHT_OUTPUT, "");
-		configOutput(LEFT_OUTPUT, "");
+		configParam(PRATE_PARAM, 0.1f, 500.f, 120.f, "Rate (BPM)");
+		configParam(TRIM_PARAM, 0.f, 2.f, 1.f, "Trim");
+		configInput(IN_INPUT, "In");
+		configInput(IRATE_INPUT, "Rate");
+		configOutput(RIGHT_OUTPUT, "Right");
+		configOutput(LEFT_OUTPUT, "Left");
 	}
 
 	float phase = 0.f;
 	std::array<float,16> phases;
 
 	void process(const ProcessArgs& args) override {
-		int bpm = params[RATE_PARAM].getValue();
+
+		float bpm;
+
+		if (inputs[IRATE_INPUT].isConnected()){
+			float in = inputs[IRATE_INPUT].getVoltage();
+			bpm = 24.995f*in+250.05f;
+		}
+		else {
+			bpm = params[PRATE_PARAM].getValue();
+		}
+			
 		float freq = float(bpm) / 60;
 
 		//accumulate phase
@@ -56,6 +69,10 @@ struct PolyAutoPan : Module {
 			left += in*triangleWave(phases[i]);
 			right += in*(1-triangleWave(phases[i]));
 		}
+
+		left *= params[TRIM_PARAM].getValue();
+		right *= params[TRIM_PARAM].getValue();
+
 		outputs[LEFT_OUTPUT].setVoltage(left);
 		outputs[RIGHT_OUTPUT].setVoltage(right);
 	}
@@ -74,12 +91,14 @@ struct PolyAutoPanWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/PolyAutoPan.svg")));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.805, 64.048)), module, PolyAutoPan::RATE_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.186, 44.605)), module, PolyAutoPan::PRATE_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.305, 79.447)), module, PolyAutoPan::TRIM_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.16, 15.452)), module, PolyAutoPan::IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.186, 19.266)), module, PolyAutoPan::IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.186, 54.867)), module, PolyAutoPan::IRATE_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(5.79, 112.306)), module, PolyAutoPan::RIGHT_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(13.951, 112.306)), module, PolyAutoPan::LEFT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.186, 105.173)), module, PolyAutoPan::RIGHT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(10.186, 115.776)), module, PolyAutoPan::LEFT_OUTPUT));
 	}
 };
 
