@@ -1,6 +1,6 @@
 // TODO: QuickMelody State, polylf inputs, autopan rate input, 16 squared copy/paste step
 // Visuals: vcv knobs/buttons/lights/ports, add bobaudio sytle knob ranges+values, empty set logo bottom, name top, box trigger/inputs, box outputs
-// Component labels: Futura PT Medium 12pt
+// Component labels: Futura PT Medium 10pt
 // Module Labels: Futura PT Normal 12pt, line spacing 0.8, 1 mm from top
 // Logo: Futura PT Normal 10pt
 /*

@@ -1,18 +1,20 @@
 #include "plugin.hpp"
-#include <cmath>
 #include <array>
 
 
 struct Pulsar : Module {
 	enum ParamId {
-		BI_PARAM,
-		WIDTH_PARAM,
-		TAPER_PARAM,
+		PVOCT_PARAM,
+		PWIDTH_PARAM,
+		PTAPER_PARAM,
 		LFO_PARAM,
+		BI_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
-		VOCT_INPUT,
+		IVOCT_INPUT,
+		IWIDTH_INPUT,
+		ITAPER_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -20,19 +22,21 @@ struct Pulsar : Module {
 		OUTPUTS_LEN
 	};
 	enum LightId {
-		BI_LIGHT,
-		LFO_LIGHT,
+    BI_LIGHT,
+    LFO_LIGHT,
 		LIGHTS_LEN
 	};
 
 	Pulsar() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
+		configParam(PVOCT_PARAM, -10.f, 10.f, 0.f, "V/Oct");
+		configParam(PWIDTH_PARAM, 0.f, 1.f, 0.5f, "Width");
+		configParam(PTAPER_PARAM, 0.f, 1.f, 0.5f, "Taper");
+		configSwitch(LFO_PARAM, 0.f, 1.f, 0.f, "VCO/LFO", {"VCO","LFO"});
 		configSwitch(BI_PARAM, 0.f, 1.f, 0.f, "Uni/Bi",{"Unipolar", "Bipolar"});
-		configParam(WIDTH_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(TAPER_PARAM, 0.f, 1.f, 0.f, "");
-		configSwitch(LFO_PARAM, 0.f, 1.f, 0.f, "VCO/LFO",{"VCO","LFO"});
-		configInput(VOCT_INPUT, "");
-		configOutput(OUT_OUTPUT, "");
+		configInput(IWIDTH_INPUT, "Width");
+		configInput(ITAPER_INPUT, "Taper");
+		configOutput(OUT_OUTPUT, "Out");
 	}
 
 	std::array<float,16> phase = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -42,10 +46,13 @@ struct Pulsar : Module {
 
 		bool bipolar = params[BI_PARAM].getValue() > 0.f;
 		bool LFO = params[LFO_PARAM].getValue() > 0.f;
-		float* in = inputs[VOCT_INPUT].getVoltages();
-		int poly = inputs[VOCT_INPUT].getChannels();
-		float a = params[TAPER_PARAM].getValue();	
-		float width = params[WIDTH_PARAM].getValue();
+		float* in = inputs[IVOCT_INPUT].getVoltages();
+		float* aIn = inputs[ITAPER_INPUT].getVoltages();
+		float* widthIn = inputs[IWIDTH_INPUT].getVoltages();
+		int poly = inputs[IVOCT_INPUT].getChannels();
+		float a = params[PTAPER_PARAM].getValue();	
+		float width = params[PWIDTH_PARAM].getValue();
+		float voct = params[PVOCT_PARAM].getValue();
 
 		// set offset	
 		float offset;
@@ -65,13 +72,15 @@ struct Pulsar : Module {
 		if (LFO){
 			lights[LFO_LIGHT].setBrightness(1);
 			for (int i = 0; i<poly; i++){
-				freq[i]	 = std::pow(2,in[i]-5.f)*dsp::FREQ_C4;
+        float chanVoct = math::clamp(in[i]+voct-5.f,-10.f,10.f);
+				freq[i]	 = std::pow(2,chanVoct)*dsp::FREQ_C4;
 			}
 		}
 		else {
 			lights[LFO_LIGHT].setBrightness(0);
 			for (int i = 0; i<poly; i++){
-				freq[i]	 = std::pow(2,in[i])*dsp::FREQ_C4;
+        float chanVoct = math::clamp(in[i]+voct,-10.f,10.f);
+				freq[i]	 = std::pow(2,chanVoct)*dsp::FREQ_C4;
 			}
 		}
 
@@ -84,7 +93,10 @@ struct Pulsar : Module {
 			if (phase[i] >= 1.f)
 				phase[i] -= 1.f;
 
-			outputs[OUT_OUTPUT].setVoltage(tukeyWindow(phase[i],a,width)+offset,i);
+      float chanA = math::clamp((aIn[i]/10.f)+a,0.f,1.f);
+      float chanWidth = math::clamp((widthIn[i]/10.f)+width,0.f,1.f);
+
+			outputs[OUT_OUTPUT].setVoltage(tukeyWindow(phase[i],chanA,chanWidth)+offset,i);
 		}
 	}
 
@@ -108,20 +120,23 @@ struct Pulsar : Module {
 };
 
 
-
 struct PulsarWidget : ModuleWidget {
 	PulsarWidget(Pulsar* module) {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Pulsar.svg")));
 
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(28.949, 15.023)), module, Pulsar::BI_PARAM, Pulsar::BI_LIGHT));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.538, 30.987)), module, Pulsar::WIDTH_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(25.216, 31.552)), module, Pulsar::TAPER_PARAM));
-		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(18.379, 44.16)), module, Pulsar::LFO_PARAM, Pulsar::LFO_LIGHT));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(20.368, 18.41)), module, Pulsar::PVOCT_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(12.049, 50.611)), module, Pulsar::PWIDTH_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.941, 50.611)), module, Pulsar::PTAPER_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(11.228, 14.992)), module, Pulsar::VOCT_INPUT));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(12.168, 82.594)), module, Pulsar::LFO_PARAM, Pulsar::LFO_LIGHT));
+		addParam(createLightParamCentered<VCVLightLatch<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(29.059, 82.594)), module, Pulsar::BI_PARAM, Pulsar::BI_LIGHT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(21.139, 118.554)), module, Pulsar::OUT_OUTPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(20.368, 29.023)), module, Pulsar::IVOCT_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(12.049, 61.225)), module, Pulsar::IWIDTH_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(28.941, 61.225)), module, Pulsar::ITAPER_INPUT));
+
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(20.461, 118.168)), module, Pulsar::OUT_OUTPUT));
 	}
 };
 
