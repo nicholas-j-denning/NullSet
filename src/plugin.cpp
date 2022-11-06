@@ -33,6 +33,7 @@ void init(Plugin* p) {
 	p->addModel(model_16Squared);
 	p->addModel(modelLabeledPatchbay);
 	p->addModel(modelPulsar);
+	p->addModel(modelRomanQuantizer);
 
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.

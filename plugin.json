@@ -58,6 +58,12 @@
       "name": "Pulsar",
       "description": "",
       "tags": []
+    },
+    {
+      "slug": "RomanQuantizer",
+      "name": "Roman Quantizer",
+      "description": "",
+      "tags": []
     }
   ]
 }
