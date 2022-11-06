@@ -1,3 +1,9 @@
+// TODO: JSON state saving
+// TODO: add Key display
+// TODO: make 16Squared step act like this one
+// TODO: change other plugin knobs to stepped
+// TODO: make chord display more modular
+// TODO: add more chords
 #include "plugin.hpp"
 #include <memory>
 #include <array>
@@ -5,7 +11,6 @@
 #include <string>
 #include <math.h>
 #include <iostream>
-
 
 enum Interval {
   I,
@@ -54,14 +59,51 @@ std::string intervalString(int interval){
 }
 
 enum Quality {
-  MAJOR,
+  // Triads
+  MAJ,
+  MIN,
+  DIM,
+  AUG,
+  SUS2,
+  SUS4,
+
+  // 7ths
+  MAJ7,
+  MIN7,
+  DOM7,
+  DIM7_HALF,
+  DIM7_FULL,
+  AUG7,
+
   QUALITY_LEN
 };
 
 std::string qualityString(int quality){
   switch (quality) {
-    case MAJOR:
-      return "MAJOR";
+    case MAJ:
+      return "Major";
+    case MIN:
+      return "Minor";
+    case DIM: 
+      return "Diminished";
+    case AUG:
+      return "Augmented";
+    case SUS2:
+      return "Suspended 2nd";
+    case SUS4:
+      return "Suspended 4th";
+    case MAJ7:
+      return "Major 7th";
+    case MIN7:
+      return "Minor 7th";
+    case DOM7:
+      return "Dominant 7th";
+    case DIM7_HALF:
+      return "Half Diminished 7th";
+    case DIM7_FULL:
+      return "Fully Diminished 7th";
+    case AUG7:
+      return "Augmented 7th";
   }
   return "ERROR: SWITCH REACHED END";
 }
@@ -69,23 +111,60 @@ std::string qualityString(int quality){
 class Chord {
   Quality quality;
   Interval interval;
-  bool enabled;
   std::vector<int> pitches;
+  void makePitches();
 
 public:
-  Chord(Quality quality, Interval interval);
+  Chord(Quality quality, Interval interval): quality{quality}, interval{interval}{makePitches();};
+  Chord(): quality{MAJ}, interval{I}{makePitches();};
+  void setChord(Quality quality, Interval interval){
+    this->quality=quality;
+    this->interval=interval;
+    makePitches();
+  }
   float quantize(float input);
-  bool isEnabled(){return enabled;};
-  void enable(){enabled=true;};
-  void disable(){enabled=false;};
   Quality getQuality(){return quality;}
   Interval getInterval(){return interval;}
 };
 
-Chord::Chord(Quality quality,Interval interval): quality{quality}, interval{interval}{
+
+void Chord::makePitches(){
   switch (quality) {
-    case MAJOR:
+    case MAJ:
       pitches = {0,4,7};
+      break;
+    case MIN:
+      pitches = {0,3,7};
+      break;
+    case DIM: 
+      pitches = {0,3,6};
+      break;
+    case AUG:
+      pitches = {0,4,8};
+      break;
+    case SUS2:
+      pitches = {0,2,7};
+      break;
+    case SUS4:
+      pitches = {0,5,7};
+      break;
+    case MAJ7:
+      pitches = {0,4,7,11};
+      break;
+    case MIN7:
+      pitches = {0,3,7,10};
+      break;
+    case DOM7:
+      pitches = {0,4,7,10};
+      break;
+    case DIM7_HALF:
+      pitches = {0,3,6,10};
+      break;
+    case DIM7_FULL:
+      pitches = {0,3,6,9};
+      break;
+    case AUG7:
+      pitches = {0,4,8,11};
       break;
     case QUALITY_LEN:
       pitches = {};
@@ -149,10 +228,10 @@ struct RomanQuantizer : Module {
 	RomanQuantizer() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configParam(PSTEP_PARAM, 0.f, 10.f, 0.f, "Step");
-		configParam(STEPS_PARAM, 1.f, 16.99f, 16.f, "Steps");
+		configParam(STEPS_PARAM, 1.f, 16.f, 16.f, "Steps");
 		configParam(PRESET_PARAM, 0.f, 10.f, 0.f, "Reset");
-		configParam(KEY_PARAM, 1.f, 12.99f, 1.f, "Key");
-		configParam(PPATTERN_PARAM, 0.f, 9.99f, 0.f, "Pattern");
+		configParam(KEY_PARAM, 1.f, 12.f, 1.f, "Key");
+		configParam(PPATTERN_PARAM, 1.f, 10.f, 1.f, "Pattern");
 		configInput(IN_INPUT, "In");
 		configInput(ISTEP_INPUT, "Step");
 		configInput(IRESET_INPUT, "Reset");
@@ -161,27 +240,17 @@ struct RomanQuantizer : Module {
 		configOutput(ROOT_OUTPUT, "Root Note");
 		configOutput(OUT_OUTPUT, "Out");
     lightOn(0);
+    chords.at(0).at(0)=Chord(MAJ,I);
+    chords.at(0).at(1)=Chord(MAJ,IV);
+    chords.at(0).at(2)=Chord(MAJ,V);
+    chords.at(0).at(3)=Chord(MAJ,I);
+    chords.at(1).at(3)=Chord(MAJ,VII);
 	}
 
   int step = 0;
-  std::array<Chord,16> chords ={
-    Chord(MAJOR,I),
-    Chord(MAJOR,IV),
-    Chord(MAJOR,V),
-    Chord(MAJOR,I),
-    Chord(MAJOR,I),
-    Chord(MAJOR,IV),
-    Chord(MAJOR,V),
-    Chord(MAJOR,I),
-    Chord(MAJOR,I),
-    Chord(MAJOR,IV),
-    Chord(MAJOR,V),
-    Chord(MAJOR,I),
-    Chord(MAJOR,I),
-    Chord(MAJOR,IV),
-    Chord(MAJOR,V),
-    Chord(MAJOR,I)
-  };
+  int pattern = 1;
+	int totalSteps = 16;
+  std::array<std::array<Chord,16>,10> chords;
 	dsp::SchmittTrigger forwardTrigger;
 	dsp::SchmittTrigger resetTrigger;
 	dsp::SchmittTrigger forwardButtonTrigger;
@@ -190,14 +259,12 @@ struct RomanQuantizer : Module {
 
 	void process(const ProcessArgs& args) override {
 
-		int totalSteps = std::floor(params[STEPS_PARAM].getValue());	
+		totalSteps = params[STEPS_PARAM].getValue();	
+		float key = params[KEY_PARAM].getValue() - 1;	
+		float transpose = inputs[TRANSPOSE_INPUT].getVoltage();	
+    pattern = params[PPATTERN_PARAM].getValue();
 		int channels = inputs[IN_INPUT].getChannels();
 		outputs[OUT_OUTPUT].setChannels(channels);
-
-    for (int i = 0; i<16;i++){
-      if (i<totalSteps) chords[i].enable();
-      else chords[i].disable();
-    }
 
 		// Get trigger inputs
 		bool forward = forwardTrigger.process(rescale(inputs[ISTEP_INPUT].getVoltage() , 0.1f, 2.f, 0.f, 1.f));
@@ -206,6 +273,11 @@ struct RomanQuantizer : Module {
 		bool resetButton = resetButtonTrigger.process(rescale(params[PRESET_PARAM].getValue(), 0.1f, 2.f, 0.f, 1.f));
 
 		// Update step
+		if(step>=totalSteps){
+			lightOff(step);
+			step--;
+			lightOn(step);
+		}
 		if(resetButton){
 			lightOff(step);
 			step=0;
@@ -230,10 +302,12 @@ struct RomanQuantizer : Module {
 		}
     for (int i= 0;i<channels;i++){
       float in = inputs[IN_INPUT].getVoltage(i);
-      float out = chords[step].quantize(in);
-      outputs[OUT_OUTPUT].setVoltage(out);
+      //std::cout << in;
+      float out = math::clamp(chords.at(pattern-1).at(step).quantize(in)+(1.f/12.f)*key+transpose,-10.f,10.f);
+      outputs[OUT_OUTPUT].setVoltage(out,i);
     }
-		
+      float out = clamp((1.f/12.f)*(chords.at(pattern-1).at(step).getInterval()+key)+transpose,-10.f,10.f);
+      outputs[ROOT_OUTPUT].setVoltage(out);
 	}
 
 	void lightOff(int light){
@@ -345,20 +419,22 @@ struct RomanQuantizer : Module {
 
 struct ChordWidget : SvgWidget {
   RomanQuantizer* module;
-  int index;
+  int step;
   std::array<std::array<std::shared_ptr<window::Svg>,QUALITY_LEN>,INTERVAL_LEN> svg; // svg[I][MAJOR]
   std::shared_ptr<window::Svg> blank;
   void draw(const DrawArgs &args) override{
     if(module){
-      if (module->chords[index].isEnabled())
-        setSvg(svg.at(module->chords[index].getInterval()).at(module->chords[index].getQuality()));
+      if (module->totalSteps>step){
+        int pattern = module->pattern-1;
+        setSvg(svg.at(module->chords.at(pattern).at(step).getInterval()).at(module->chords.at(pattern).at(step).getQuality()));
+      }
       else 
         setSvg(blank);
     }
-
     SvgWidget::draw(args);
   }
 };
+
 
 struct RomanQuantizerWidget : ModuleWidget {
 	RomanQuantizerWidget(RomanQuantizer* module) {
@@ -371,7 +447,8 @@ struct RomanQuantizerWidget : ModuleWidget {
     std::array<std::array<std::shared_ptr<window::Svg>,QUALITY_LEN>,INTERVAL_LEN> chordSvgs;
     for(int i=0;i<INTERVAL_LEN;i++){
       for(int q=0;q<QUALITY_LEN;q++){
-        std::string filename = "res/chords/" + intervalString(i)+ "_" + qualityString(q) + ".svg";
+        // std::string filename = "res/chords/" + intervalString(i)+ "_" + qualityString(q) + ".svg";
+        std::string filename = "res/chords/" + intervalString(i)+ "_MAJOR.svg";
         chordSvgs.at(i).at(q) = Svg::load(asset::plugin(pluginInstance, filename));
       }
     }
@@ -384,16 +461,17 @@ struct RomanQuantizerWidget : ModuleWidget {
         x->svg=chordSvgs;
         x->box.pos = mm2px(Vec(37.9+27.5*i, 12.3+27.5*j));
         x->module = module;
-        x->index = i+j*4;
+        x->step = i+j*4;
         addChild(x);
       }
     }
 
+
 		addParam(createParamCentered<VCVButton>(mm2px(Vec(25.79, 17.144)), module, RomanQuantizer::PSTEP_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.038, 38.694)), module, RomanQuantizer::STEPS_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(10.038, 38.694)), module, RomanQuantizer::STEPS_PARAM));
 		addParam(createParamCentered<VCVButton>(mm2px(Vec(25.79, 50.911)), module, RomanQuantizer::PRESET_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(10.038, 61.149)), module, RomanQuantizer::KEY_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(25.79, 84.677)), module, RomanQuantizer::PPATTERN_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(10.038, 61.149)), module, RomanQuantizer::KEY_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(25.79, 84.677)), module, RomanQuantizer::PPATTERN_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.038, 16.239)), module, RomanQuantizer::IN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(25.79, 27.758)), module, RomanQuantizer::ISTEP_INPUT));
@@ -421,6 +499,27 @@ struct RomanQuantizerWidget : ModuleWidget {
 		addChild(createLightCentered<MediumLight<WhiteLight>>(mm2px(Vec(114.313, 116.404)), module, RomanQuantizer::L15_LIGHT));
 		addChild(createLightCentered<MediumLight<WhiteLight>>(mm2px(Vec(141.784, 116.404)), module, RomanQuantizer::L16_LIGHT));
 	}
+  
+  void appendContextMenu(Menu* menu) override {
+    menu->addChild(new MenuSeparator);
+    RomanQuantizer* rq = dynamic_cast<RomanQuantizer*>(module);
+    int pattern = rq->pattern-1;
+    for (int step=0; step<16;step++){
+      menu->addChild(createSubmenuItem("Set Step "+std::to_string(step+1)+" Chord","",[=](Menu* menu){
+      //   menu->addChild(createMenuItem("Interval:"));
+        for (int interval=0;interval<INTERVAL_LEN;interval++){
+          menu->addChild(createSubmenuItem(intervalString(interval),"",[=](Menu* menu){
+            for (int quality=0;quality<QUALITY_LEN;quality++){
+                menu->addChild(createMenuItem(qualityString(quality),"",[=](){
+                  rq->chords.at(pattern).at(step).setChord((Quality)quality,(Interval)interval);
+                }));
+              }
+          }));
+        }
+        }));
+    }
+    ModuleWidget::appendContextMenu(menu);
+  }
 };
 
 
