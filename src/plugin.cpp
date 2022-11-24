@@ -1,4 +1,16 @@
-// TODO: QuickMelody State, polylf inputs, autopan rate input, 16 squared copy/paste step
+// TODO: 16 squared copy/paste step
+// TODO: make 16Squared step change when step is lowered like ROman
+// TODO: change plugin knobs to stepped as needed
+// TODO: Wavtetable VCO, with serum like inteface, load wavtable folder, random selection, table hybridization
+// TODO: exponential rhythm generator,
+// TODO: convolutional/granular cross synthesis
+// TODO: Grainset: open multiple files, granulate. Can arrage by various properties such as spectral centroid
+// TODO: Polyphonic waveguide resonator
+// TODO: Bon Iver style voice tuner
+// TODO: 16 random constants on a poly cable, set range, button/trigger to randomize
+// TODO: poly waveguide physical modeling synthesis
+
+
 // Visuals: vcv knobs/buttons/lights/ports, add bobaudio sytle knob ranges+values, empty set logo bottom, name top, box trigger/inputs, box outputs
 // Component labels: Futura PT Medium 10pt
 // Module Labels: Futura PT Normal 12pt, line spacing 0.8, 1 mm from top

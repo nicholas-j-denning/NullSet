@@ -1,8 +1,4 @@
-// TODO: JSON state saving
 // TODO: add Key display
-// TODO: make 16Squared step act like this one
-// TODO: change other plugin knobs to stepped
-// TODO: make chord display more modular
 // TODO: add more chords
 #include "plugin.hpp"
 #include <memory>
@@ -33,27 +29,57 @@ std::string intervalString(int interval){
     case I: 
       return "I";
     case II_FLAT: 
-      return "II_FLAT";
+      return "II Flat";
     case II: 
       return "II";
     case III_FLAT: 
-      return "III_FLAT";
+      return "III Flat";
     case III: 
       return "III";
     case IV: 
       return "IV";
     case IV_SHARP: 
-      return "IV_SHARP";
+      return "IV Sharp";
     case V: 
       return "V";
     case VI_FLAT: 
-      return "VI_FLAT";
+      return "VI Flat";
     case VI: 
       return "VI";
     case VII_FLAT: 
-      return "VII_FLAT";
+      return "VII Flat";
     case VII: 
       return "VII";
+  }
+  return "ERROR: SWITCH REACHED END";
+}
+
+std::string intervalSvg(int interval){
+  switch (interval) {
+    case I: 
+      return "I.svg";
+    case II_FLAT: 
+      return "II_flat.svg";
+    case II: 
+      return "II.svg";
+    case III_FLAT: 
+      return "III_flat.svg";
+    case III: 
+      return "III.svg";
+    case IV: 
+      return "IV.svg";
+    case IV_SHARP: 
+      return "IV_sharp.svg";
+    case V: 
+      return "V.svg";
+    case VI_FLAT: 
+      return "VI_flat.svg";
+    case VI: 
+      return "VI.svg";
+    case VII_FLAT: 
+      return "VII_flat.svg";
+    case VII: 
+      return "VII.svg";
   }
   return "ERROR: SWITCH REACHED END";
 }
@@ -74,9 +100,74 @@ enum Quality {
   DIM7_HALF,
   DIM7_FULL,
   AUG7,
+  MM7,
 
   QUALITY_LEN
 };
+
+std::string baseSvgFolder(int quality){
+  switch (quality) {
+    case MAJ:
+      return "res/chords/major/";
+    case MIN:
+      return "res/chords/minor/";
+    case DIM: 
+      return "res/chords/minor/";
+    case AUG:
+      return "res/chords/major/";
+    case SUS2:
+      return "res/chords/major/";
+    case SUS4:
+      return "res/chords/major/";
+    case MAJ7:
+      return "res/chords/major/";
+    case MIN7:
+      return "res/chords/minor/";
+    case DOM7:
+      return "res/chords/major/";
+    case DIM7_HALF:
+      return "res/chords/minor/";
+    case DIM7_FULL:
+      return "res/chords/minor/";
+    case AUG7:
+      return "res/chords/major/";
+    case MM7:
+      return "res/chords/major/";
+  }
+  return "ERROR: SWITCH REACHED END";
+}
+
+std::string extensionSvg(int quality){
+  switch (quality) {
+    case MAJ:
+      return "res/chords/extension/blank.svg";
+    case MIN:
+      return "res/chords/extension/blank.svg";
+    case DIM: 
+      return "res/chords/extension/dim.svg";
+    case AUG:
+      return "res/chords/extension/aug.svg";
+    case SUS2:
+      return "res/chords/extension/sus2.svg";
+    case SUS4:
+      return "res/chords/extension/sus4.svg";
+    case MAJ7:
+      return "res/chords/extension/maj7.svg";
+    case MIN7:
+      return "res/chords/extension/7.svg";
+    case DOM7:
+      return "res/chords/extension/7.svg";
+    case DIM7_HALF:
+      return "res/chords/extension/half_dim7.svg";
+    case DIM7_FULL:
+      return "res/chords/extension/full_dim7.svg";
+    case AUG7:
+      return "res/chords/extension/aug7.svg";
+    case MM7:
+      return "res/chords/extension/min7.svg";
+  }
+  return "ERROR: SWITCH REACHED END";
+}
 
 std::string qualityString(int quality){
   switch (quality) {
@@ -104,6 +195,8 @@ std::string qualityString(int quality){
       return "Fully Diminished 7th";
     case AUG7:
       return "Augmented 7th";
+    case MM7:
+      return "Minor Major 7th";
   }
   return "ERROR: SWITCH REACHED END";
 }
@@ -165,6 +258,9 @@ void Chord::makePitches(){
       break;
     case AUG7:
       pitches = {0,4,8,11};
+      break;
+    case MM7:
+      pitches = {0,3,7,11};
       break;
     case QUALITY_LEN:
       pitches = {};
@@ -415,7 +511,63 @@ struct RomanQuantizer : Module {
 				break;
 		}
 	}
+
+  json_t* dataToJson() override {
+
+    json_t* rootJ = json_object();
+
+    json_object_set_new(rootJ, "step", json_integer(step));
+    
+    json_t* intervalJ = json_array();
+		for(int i = 0; i<10; i++){
+			for(int j = 0; j<16; j++){
+				json_array_insert_new(intervalJ, j+(i*16),json_integer(chords.at(i).at(j).getInterval()));
+			}
+		}
+		json_object_set_new(rootJ, "intervals", intervalJ);
+
+    json_t* qualityJ = json_array();
+		for(int i = 0; i<10; i++){
+			for(int j = 0; j<16; j++){
+				json_array_insert_new(qualityJ, j+(i*16),json_integer(chords.at(i).at(j).getQuality()));
+			}
+		}
+		json_object_set_new(rootJ, "qualities", qualityJ);
+
+		return rootJ;
+  }
+
+	void dataFromJson(json_t *rootJ) override {
+
+		// get step from json
+		json_t * stepJ = json_object_get(rootJ, "step");
+		if (stepJ)
+			step = json_integer_value(stepJ);
+		
+		lightOff(0);
+		lightOn(step);
+
+		//get value[][] from json
+		json_t *qualityJ = json_object_get(rootJ, "qualities");	
+		json_t *intervalJ = json_object_get(rootJ, "intervals");	
+		if (qualityJ&&intervalJ)
+			for(int i = 0; i<10; i++){
+				for(int j = 0; j<16; j++){
+					json_t* intervalArrayJ = json_array_get(intervalJ,j+(i*16));
+					json_t* qualityArrayJ = json_array_get(qualityJ,j+(i*16));
+          Interval interval = I;
+          Quality quality = MAJ;
+					if (intervalArrayJ&&qualityArrayJ){
+						interval = (Interval)json_number_value(intervalArrayJ);	
+						quality = (Quality)json_number_value(qualityArrayJ);	
+            chords.at(i).at(j).setChord(quality,interval);
+          }
+				}
+			}	
+	}
 };
+
+
 
 struct ChordWidget : SvgWidget {
   RomanQuantizer* module;
@@ -445,20 +597,35 @@ struct RomanQuantizerWidget : ModuleWidget {
     std::shared_ptr<window::Svg> blankSvg;
     blankSvg = Svg::load(asset::plugin(pluginInstance,"res/chords/BLANK.svg"));
     std::array<std::array<std::shared_ptr<window::Svg>,QUALITY_LEN>,INTERVAL_LEN> chordSvgs;
+    std::array<std::array<std::shared_ptr<window::Svg>,QUALITY_LEN>,INTERVAL_LEN> extensionSvgs;
     for(int i=0;i<INTERVAL_LEN;i++){
       for(int q=0;q<QUALITY_LEN;q++){
-        // std::string filename = "res/chords/" + intervalString(i)+ "_" + qualityString(q) + ".svg";
-        std::string filename = "res/chords/" + intervalString(i)+ "_MAJOR.svg";
+        // std::string filename = "res/chords/" + intervalString(i)+ "_MAJOR.svg";
+        std::string filename = baseSvgFolder(q) + intervalSvg(i);
         chordSvgs.at(i).at(q) = Svg::load(asset::plugin(pluginInstance, filename));
+        filename = extensionSvg(q);
+        extensionSvgs.at(i).at(q) = Svg::load(asset::plugin(pluginInstance, filename));
       }
     }
 
-    // initialize ChordWidgets
+    // initialize ChordWidgets for chordsvgs
     for(int i=0;i<4;i++){
       for(int j=0;j<4;j++){
         ChordWidget* x = new ChordWidget();
         x->blank=blankSvg;
         x->svg=chordSvgs;
+        x->box.pos = mm2px(Vec(37.9+27.5*i, 12.3+27.5*j));
+        x->module = module;
+        x->step = i+j*4;
+        addChild(x);
+      }
+    }
+    // initialize for extensionsvgs
+    for(int i=0;i<4;i++){
+      for(int j=0;j<4;j++){
+        ChordWidget* x = new ChordWidget();
+        x->blank=blankSvg;
+        x->svg=extensionSvgs;
         x->box.pos = mm2px(Vec(37.9+27.5*i, 12.3+27.5*j));
         x->module = module;
         x->step = i+j*4;
