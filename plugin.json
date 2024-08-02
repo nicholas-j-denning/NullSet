@@ -64,6 +64,12 @@
       "name": "Roman Quantizer",
       "description": "",
       "tags": []
+    },
+    {
+      "slug": "Cell",
+      "name": "Cell",
+      "description": "",
+      "tags": []
     }
   ]
 }
