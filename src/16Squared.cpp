@@ -84,6 +84,11 @@ struct _16Squared : Module {
 		configInput(IBACK_INPUT, "Back");
 		configInput(IRESET_INPUT, "Reset");
 		configOutput(OUT_OUTPUT, "Out");
+		
+		// Snap params to integer values
+		paramQuantities[STEPS_PARAM]->snapEnabled = true;
+		paramQuantities[POLY_PARAM]->snapEnabled = true;
+
 		lightOn(step);
 		for(int i = 0; i<16; i++)
 			for(int j = 0; j<16; j++)

@@ -34,6 +34,7 @@ struct PolyLFT : Module {
 		configInput(IMIN_INPUT, "Min");
 		configInput(IMAX_INPUT, "Max");
 		configOutput(OUT_OUTPUT, "LFO");
+		paramQuantities[POLY_PARAM]->snapEnabled = true;
 	}
 
 	float phase = 0.f;
