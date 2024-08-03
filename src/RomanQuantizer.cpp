@@ -211,6 +211,52 @@ std::string qualityString(int quality)
   return "ERROR: SWITCH REACHED END";
 }
 
+enum Key
+{
+  C,
+  C_SHARP,
+  D,
+  D_SHARP,
+  E,
+  F,
+  F_SHARP,
+  G,
+  G_SHARP,
+  A,
+  A_SHARP,
+  B
+};
+
+std::string keySvg(int key){
+  switch(key){
+  case C:
+    return "C.svg";
+  case C_SHARP:
+    return "C_SHARP.svg";
+  case D:
+    return "D.svg";
+  case D_SHARP:
+    return "D_SHARP.svg";
+  case E:
+    return "E.svg";
+  case F:
+    return "F.svg";
+  case F_SHARP:
+    return "F_SHARP.svg";
+  case G:
+    return "G.svg";
+  case G_SHARP:
+    return "G_SHARP.svg";
+  case A:
+    return "A.svg";
+  case A_SHARP:
+    return "A_SHARP.svg";
+  case B:
+    return "B.svg";
+  }
+  return "ERROR: SWITCH REACHED END";
+}
+
 class Chord
 {
   Quality quality;
@@ -374,6 +420,7 @@ struct RomanQuantizer : Module
   int step = 0;
   int pattern = 1;
   int totalSteps = 16;
+  int key = 1;
   std::array<std::array<Chord, 16>, 10> chords;
   dsp::SchmittTrigger forwardTrigger;
   dsp::SchmittTrigger resetTrigger;
@@ -384,7 +431,7 @@ struct RomanQuantizer : Module
   {
 
     totalSteps = params[STEPS_PARAM].getValue();
-    float key = params[KEY_PARAM].getValue() - 1;
+    key = params[KEY_PARAM].getValue() - 1;
     float transpose = inputs[TRANSPOSE_INPUT].getVoltage();
     pattern = params[PPATTERN_PARAM].getValue();
     int channels = inputs[IN_INPUT].getChannels();
@@ -434,7 +481,6 @@ struct RomanQuantizer : Module
     for (int i = 0; i < channels; i++)
     {
       float in = inputs[IN_INPUT].getVoltage(i);
-      // std::cout << in;
       float out = math::clamp(chords.at(pattern - 1).at(step).quantize(in) + (1.f / 12.f) * key + transpose, -10.f, 10.f);
       outputs[OUT_OUTPUT].setVoltage(out, i);
     }
@@ -638,6 +684,21 @@ struct ChordWidget : SvgWidget
   }
 };
 
+struct KeyWidget : SvgWidget
+{
+  RomanQuantizer *module;
+  std::array<std::shared_ptr<window::Svg>, 12> svg;
+  void draw(const DrawArgs &args) override
+  {
+    if (module)
+    {
+      setSvg(svg[module->key]);
+    }
+    SvgWidget::draw(args);
+  }
+};
+
+
 struct RomanQuantizerWidget : ModuleWidget
 {
   RomanQuantizerWidget(RomanQuantizer *module)
@@ -645,9 +706,24 @@ struct RomanQuantizerWidget : ModuleWidget
     setModule(module);
     setPanel(createPanel(asset::plugin(pluginInstance, "res/RomanQuantizer.svg")));
 
-    // load svgs
-    std::shared_ptr<window::Svg> blankSvg;
-    blankSvg = Svg::load(asset::plugin(pluginInstance, "res/chords/BLANK.svg"));
+    // load key svgs
+    std::array<std::shared_ptr<window::Svg>, 12> keySvgs;
+    for (int i = 0; i < 12; i++)
+    {
+      std::string filename = "res/keys/" + keySvg(i);
+      keySvgs.at(i) = Svg::load(asset::plugin(pluginInstance, filename));
+    }
+    
+    //Initialize KeyWidget
+    KeyWidget *keyWidget = new KeyWidget();
+    keyWidget->svg = keySvgs;
+    keyWidget->box.pos = mm2px(Vec(4.2, 67.3));
+    keyWidget->module = module;
+    addChild(keyWidget);
+    
+    //load chord svgs
+    std::shared_ptr<window::Svg> blankChordSvg;
+    blankChordSvg = Svg::load(asset::plugin(pluginInstance, "res/chords/BLANK.svg"));
     std::array<std::array<std::shared_ptr<window::Svg>, QUALITY_LEN>, INTERVAL_LEN> chordSvgs;
     std::array<std::array<std::shared_ptr<window::Svg>, QUALITY_LEN>, INTERVAL_LEN> extensionSvgs;
     for (int i = 0; i < INTERVAL_LEN; i++)
@@ -668,7 +744,7 @@ struct RomanQuantizerWidget : ModuleWidget
       for (int j = 0; j < 4; j++)
       {
         ChordWidget *x = new ChordWidget();
-        x->blank = blankSvg;
+        x->blank = blankChordSvg;
         x->svg = chordSvgs;
         x->box.pos = mm2px(Vec(37.9 + 27.5 * i, 12.3 + 27.5 * j));
         x->module = module;
@@ -682,7 +758,7 @@ struct RomanQuantizerWidget : ModuleWidget
       for (int j = 0; j < 4; j++)
       {
         ChordWidget *x = new ChordWidget();
-        x->blank = blankSvg;
+        x->blank = blankChordSvg;
         x->svg = extensionSvgs;
         x->box.pos = mm2px(Vec(37.9 + 27.5 * i, 12.3 + 27.5 * j));
         x->module = module;
