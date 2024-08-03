@@ -15,6 +15,4 @@ extern Model* modelWeightedQuantizer;
 extern Model* modelPolyLFT;
 extern Model* model_16Squared;
 extern Model* modelLabeledPatchbay;
-extern Model* modelPulsar;
 extern Model* modelRomanQuantizer;
-extern Model* modelCell;

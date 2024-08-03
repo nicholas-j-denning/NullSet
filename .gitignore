@@ -3,6 +3,7 @@
 /plugin.so
 /plugin.dylib
 /plugin.dll
+/notes
 .DS_Store
 .vscode
 compile_flags.txt
