@@ -2,13 +2,13 @@
   "slug": "NullSet",
   "name": "Null Set",
   "version": "2.0.0",
-  "license": "proprietary",
+  "license": "GPL-3.0",
   "brand": "Null Set",
   "author": "Nicholas Denning",
-  "authorEmail": "",
-  "authorUrl": "",
-  "pluginUrl": "",
-  "manualUrl": "",
+  "authorEmail": "nicholas.j.denning@gmail.com",
+  "authorUrl": "nickdenningcode.com",
+  "pluginUrl": "nickdenningcode.com/nullset",
+  "manualUrl": "nickdenningcode.com/nullset",
   "sourceUrl": "",
   "donateUrl": "",
   "changelogUrl": "",
@@ -16,7 +16,7 @@
     {
       "slug": "QuickMelody",
       "name": "Quick Melody",
-      "description": "",
+      "description": "Generate melodies using an aliasing algorithm",
       "tags": []
     },
     {
