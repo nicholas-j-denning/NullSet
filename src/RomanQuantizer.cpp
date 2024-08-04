@@ -730,7 +730,6 @@ struct RomanQuantizerWidget : ModuleWidget
     {
       for (int q = 0; q < QUALITY_LEN; q++)
       {
-        // std::string filename = "res/chords/" + intervalString(i)+ "_MAJOR.svg";
         std::string filename = baseSvgFolder(q) + intervalSvg(i);
         chordSvgs.at(i).at(q) = Svg::load(asset::plugin(pluginInstance, filename));
         filename = extensionSvg(q);
@@ -809,7 +808,6 @@ struct RomanQuantizerWidget : ModuleWidget
     {
       menu->addChild(createSubmenuItem("Set Step " + std::to_string(step + 1) + " Chord", "", [=](Menu *menu)
                                        {
-      //   menu->addChild(createMenuItem("Interval:"));
         for (int interval=0;interval<INTERVAL_LEN;interval++){
           menu->addChild(createSubmenuItem(intervalString(interval),"",[=](Menu* menu){
             for (int quality=0;quality<QUALITY_LEN;quality++){

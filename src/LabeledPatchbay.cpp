@@ -267,7 +267,6 @@ struct LabeledPatchbayWidget : ModuleWidget {
 UserLabel::UserLabel(){
 	bgColor = nvgRGB(0x59,0x4c,0x62);
 	color = nvgRGB(0xf7,0xdf,0xff);
-	//fontPath = "res\\FuturaPTMedium.otf";
 }
 
 void UserLabel::draw(const DrawArgs &args){
