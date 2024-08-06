@@ -1,3 +1,3 @@
 # Null Set Modules for VCV Rack
 
-[Screenshot](Screenshot.png)
+![Screenshot](https://github.com/nicholas-j-denning/NullSet/blob/main/Screenshot.png)
