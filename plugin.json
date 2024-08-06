@@ -7,57 +7,53 @@
   "author": "Nicholas Denning",
   "authorEmail": "nicholas.j.denning@gmail.com",
   "authorUrl": "nickdenningcode.com",
-  "pluginUrl": "nickdenningcode.com/nullset",
-  "manualUrl": "nickdenningcode.com/nullset",
-  "sourceUrl": "",
+  "pluginUrl": "https://nickdenningcode.com/nullset",
+  "manualUrl": "https://nickdenningcode.com/nullset",
+  "sourceUrl": "https://github.com/nicholas-j-denning/NullSet",
   "donateUrl": "",
-  "changelogUrl": "",
+  "changelogUrl": "https://nickdenningcode.com/nullset",
   "modules": [
     {
       "slug": "QuickMelody",
       "name": "Quick Melody",
       "description": "Generate melodies using an aliasing algorithm",
-      "tags": []
+      "tags": ["Sequencer", "Polyphonic"]
     },
     {
       "slug": "PolyAutoPan",
       "name": "Poly Auto Pan",
-      "description": "",
-      "tags": []
+      "description": "Pan a polyphonic signal using LFOs with equally spaced phases",
+      "tags": ["Polyphonic", "Panning"]
     },
     {
       "slug": "WeightedQuantizer",
       "name": "Weighted Quantizer",
-      "description": "",
-      "tags": []
+      "description": "Quantizer with note weights",
+      "tags": ["Quantizer", "Polyphonic"]
     },
     {
       "slug": "PolyLFT",
       "name": "Poly LFT",
-      "description": "Poly Low Frequency Triangle Oscillator",
-      "tags": [
-        "LFO"
-      ]
+      "description": "Polyphonic triangle LFO with equally spaced phases",
+      "tags": ["LFO", "Polyphonic"]
     },
     {
       "slug": "16Squared",
       "name": "16 Squared",
-      "description": "16 Step Polyphonic Sequencer",
-      "tags": []
+      "description": "Compact 16 step 16 channel sequencer",
+      "tags": ["Sequencer", "Polyphonic"]
     },
     {
       "slug": "LabeledPatchbay",
       "name": "Labeled Patchbay",
-      "description": "",
-      "tags": [
-        "Utility"
-      ]
+      "description": "Patchbay with labels and attenuverters",
+      "tags": ["Utility"]
     },
     {
       "slug": "RomanQuantizer",
       "name": "Roman Quantizer",
-      "description": "",
-      "tags": []
+      "description": "Quantizer based on Roman numeral chord notation",
+      "tags": ["Quantizer", "Sequencer", "Polyphonic"]
     }
   ]
 }
