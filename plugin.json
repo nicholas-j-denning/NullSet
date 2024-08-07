@@ -7,11 +7,11 @@
   "author": "Nicholas Denning",
   "authorEmail": "nicholas.j.denning@gmail.com",
   "authorUrl": "nickdenningcode.com",
-  "pluginUrl": "https://nickdenningcode.com/nullset",
-  "manualUrl": "https://nickdenningcode.com/nullset",
+  "pluginUrl": "https://github.com/nicholas-j-denning/NullSet",
+  "manualUrl": "https://github.com/nicholas-j-denning/NullSet",
   "sourceUrl": "https://github.com/nicholas-j-denning/NullSet",
   "donateUrl": "",
-  "changelogUrl": "https://nickdenningcode.com/nullset",
+  "changelogUrl": "",
   "modules": [
     {
       "slug": "QuickMelody",
