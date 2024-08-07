@@ -47,7 +47,7 @@
       "slug": "LabeledPatchbay",
       "name": "Labeled Patchbay",
       "description": "Patchbay with labels and attenuverters",
-      "tags": ["Utility"]
+      "tags": ["Utility", "Polyphonic"]
     },
     {
       "slug": "RomanQuantizer",
