@@ -34,6 +34,10 @@ Quantize polyphonic signals to a sequence of chords using Roman numeral notation
 - Root: Outputs root note of current chord
 - Out: Outputs quantized polyphonic signal
 
+This is a uniform quantizer where every note has an evenly sized range of inputs. So, for a C major chord, [0,0.333) quantizes to C, [0.333, 0.666) to E, and [0.666,1.0) to G. 
+
+This behavior makes it so that random input voltages will be evenly distributed between each note, and so that sending in triangle or saw LFO produces an evenly timed arpeggio. 
+
 ## Quick Melody
 
 Generate a melody by aliasing an oscillator with random frequency. Can also generate polyphonic chords.
