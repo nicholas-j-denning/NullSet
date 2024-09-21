@@ -1,7 +1,6 @@
 #pragma once
 #include <rack.hpp>
 
-
 using namespace rack;
 
 // Declare the Plugin, defined in plugin.cpp
@@ -15,3 +14,6 @@ extern Model* modelPolyLFT;
 extern Model* model_16Squared;
 extern Model* modelLabeledPatchbay;
 extern Model* modelRomanQuantizer;
+
+extern Model* modelMajorPalette; 
+extern Model* modelPaletteQuantizer; 

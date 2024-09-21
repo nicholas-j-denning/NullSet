@@ -11,5 +11,8 @@ void init(Plugin* p) {
 	p->addModel(modelPolyLFT);
 	p->addModel(model_16Squared);
 	p->addModel(modelLabeledPatchbay);
-	p->addModel(modelRomanQuantizer);
+	p->addModel(modelRomanQuantizer); 
+	
+	p->addModel(modelMajorPalette);
+	p->addModel(modelPaletteQuantizer);
 }
