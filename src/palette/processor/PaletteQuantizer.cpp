@@ -1,4 +1,5 @@
 #include "../Palette.hpp"
+#include <algorithm>
 
 namespace nullset::palette {
 
@@ -29,12 +30,31 @@ struct PaletteQuantizer : PaletteCompatibleModule {
 		float* voltages = inputs[IN_INPUT].getVoltages();
 		for(int i = 0; i<channels; i++){
 			float voltage = voltages[i];
-			// scale voltage from zero to size of pitch vector
-			if (voltage>9) voltage = 9;
-			voltage = (voltage + 10.0f) * pitchVector->size() / 20.0f; 
-			outputs[OUT_OUTPUT].setVoltage(pitchVector->at(std::floor(voltage)),i);	
+			outputs[OUT_OUTPUT].setVoltage(quantize(voltage),i);	
 		}
 		outputs[ROOT_OUTPUT].setVoltage(root);
+	}
+	
+	float quantize(float input) {
+			assert(pitchVector);
+			// scale voltage from zero to size of pitch vector
+			// if (input>9) input = 9;
+			// input = (input + 10.0f) * pitchVector->size() / 20.0f; 
+			// return pitchVector->at(std::floor(input));
+			float oct = std::floor(input);
+			float pitch = input - oct;
+			int n = pitchVector->size();
+			float outOct = oct;
+			if(pitch < oct + root){
+				outOct = std::min(oct -1, -10.0f);
+				pitch += 1;
+			}
+			for(int i = 1; i<n; i++){
+				if(pitch <= oct + ((float) i / (float) n)){
+					return (*pitchVector)[i-1] + outOct;
+				}	
+			}
+			return(outOct+(*pitchVector)[n-1]);
 	}
 };
 

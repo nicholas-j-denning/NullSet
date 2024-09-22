@@ -62,12 +62,10 @@ void Palette::process(const ProcessArgs& args) {
 // chord elements and root must be between 1 and scale.size() inclusive
 void Palette::init(int keyIndex, int chordIndex, int root, vector<int> chord, vector<float> scale){
     // initialize pitVector[key][chord]
-    for (int i = -10; i < 10; i++) {
         for(int note : chord) {
             int scaleIndex = (note+root-2) % scale.size();
-            pitchVectors[keyIndex][chordIndex].push_back(scale[scaleIndex] + i);
+            pitchVectors[keyIndex][chordIndex].push_back(scale[scaleIndex]);
         }	
-    }
     std::sort(pitchVectors[keyIndex][chordIndex].begin(), pitchVectors[keyIndex][chordIndex].end());
     
     // initialize root[key][chord]

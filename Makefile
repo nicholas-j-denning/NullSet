@@ -17,7 +17,11 @@ SOURCES += $(wildcard src/palette/palettes/*.cpp)
 SOURCES += $(wildcard src/palette/processor/*.cpp)
 SOURCES += $(wildcard src/palette/widgets/*.cpp)
 SOURCES += $(wildcard src/common/widgets/*.cpp)
-SOURCES += $(wildcard src/tests/*.cpp)
+
+# Enable testing if NULLSET_TEST environment variable is true
+ifeq ($(NULLSET_TEST), true)
+	SOURCES += $(wildcard src/tests/*.cpp)
+endif
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
