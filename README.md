@@ -1,5 +1,8 @@
 # Null Set Modules for VCV Rack
 
+This is a collection of modules for music composition in VCV Rack. I recommend installing them from [the public library](https://library.vcvrack.com).
+If you want to build them from source, clone the repo and follow the instructions [here](https://vcvrack.com/manual/Building).
+
 ![Screenshot](https://github.com/nicholas-j-denning/NullSet/blob/main/Screenshot.png)
 
 ## Poly LFT
